@@ -1,0 +1,99 @@
+﻿@page
+@model RannaProductProjectFrontend.Pages.IndexModel
+@{
+    ViewData["Title"] = "Token İşlemleri";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token İşlemleri</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Token İşlemleri</h2>
+
+        <!-- Token girişi ve submit butonu -->
+        <div class="form-group">
+            <label for="tokenInput">Token Girin</label>
+            <textarea class="form-control" id="tokenInput" rows="3" placeholder="Token buraya yapıştırılacak..." asp-for="Token"></textarea>
+        </div>
+        <button class="btn btn-primary" id="submitTokenBtn" onclick="submitToken()">Submit Token</button>
+
+        <!-- Generate Token butonu ve gelen token'ı gösterme -->
+        <hr class="mt-5 mb-4">
+        <h5>Token Oluşturma</h5>
+        <button class="btn btn-success mb-3" id="generateTokenBtn" onclick="generateToken()">Generate Token</button>
+
+
+        <!-- Error message area -->
+        <div id="errorMessage" class="alert alert-danger d-none" role="alert">
+            Bir hata oluştu.
+        </div>
+    </div>
+    <!-- Toast container -->
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="tokenToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Generated Token</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <span id="generatedTokenToastBody">Token burada görünecek...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#submitTokenBtn').click(function () {
+                submitToken();
+            });
+
+            $('#generateTokenBtn').click(function () {
+                generateToken();
+            });
+        });
+        // Token submit işlemi
+        function submitToken() {
+            var token = $('#tokenInput').val();
+            if (token) {
+                localStorage.setItem('token', token);
+                window.location.href = '/Product?token=' + token; // Token'ı URL'ye ekleyin
+            } else {
+                alert('Lütfen bir token girin.');
+            }
+        }
+
+        // Generate Token işlemi
+        function generateToken() {
+            $.ajax({
+                type: 'POST',
+                url: 'https://localhost:7196/api/token/generate',
+                success: function (response) {
+                    var token = response.token;
+
+                    // Toast içine token'ı yazdırma
+                    $('#generatedTokenToastBody').text(token);
+
+                    // Toast mesajını gösterme
+                    var toastElement = new bootstrap.Toast(document.getElementById('tokenToast'));
+                    toastElement.show();
+                },
+                error: function () {
+                    $('#errorMessage').removeClass('d-none');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+
